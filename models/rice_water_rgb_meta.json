@@ -1,0 +1,21 @@
+{
+  "name": "rice_water_rgb",
+  "classes": [
+    "Healthy",
+    "Mild stress",
+    "Severe stress"
+  ],
+  "input_size": 160,
+  "cnn_cv_accuracy": 0.7555555555555555,
+  "cv_fold_accuracies": [
+    0.7777777777777778,
+    0.7222222222222222,
+    0.8333333333333334,
+    0.7777777777777778,
+    0.6666666666666666
+  ],
+  "ensemble_cnn_weight": 0.0,
+  "colour_model": "rice_water_rgb_colour.joblib",
+  "colour_cv_accuracy": 0.8333333333333334,
+  "cv_accuracy": 0.8333333333333334
+}

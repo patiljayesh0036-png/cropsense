@@ -1,0 +1,13 @@
+{
+  "classes": [
+    "Healthy",
+    "Mild stress",
+    "Severe stress"
+  ],
+  "weight_rgb": 0.9467455621301775,
+  "weight_thermal": 0.05325443786982248,
+  "cv_accuracy_rgb": 0.8333333333333334,
+  "cv_accuracy_thermal": 0.47,
+  "baseline_rgb": 0.4777777777777778,
+  "baseline_thermal": 0.46
+}

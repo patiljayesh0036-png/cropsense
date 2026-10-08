@@ -1,0 +1,16 @@
+{
+  "name": "maize_nutrients",
+  "classes": [
+    "Healthy",
+    "Magnesium",
+    "Nitrogen",
+    "Phosphorus",
+    "Potassium"
+  ],
+  "input_size": 160,
+  "test": {
+    "accuracy": 0.8111111111111111,
+    "n": 90,
+    "image_level_accuracy": 0.8285714285714286
+  }
+}

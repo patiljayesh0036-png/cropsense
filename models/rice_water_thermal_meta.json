@@ -1,0 +1,17 @@
+{
+  "name": "rice_water_thermal",
+  "classes": [
+    "Healthy",
+    "Mild stress",
+    "Severe stress"
+  ],
+  "input_size": 160,
+  "cv_accuracy": 0.47,
+  "cv_fold_accuracies": [
+    0.35,
+    0.55,
+    0.4,
+    0.6,
+    0.45
+  ]
+}

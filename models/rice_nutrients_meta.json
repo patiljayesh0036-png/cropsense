@@ -1,0 +1,14 @@
+{
+  "name": "rice_nutrients",
+  "classes": [
+    "Nitrogen",
+    "Phosphorus",
+    "Potassium"
+  ],
+  "input_size": 160,
+  "test": {
+    "accuracy": 0.7293666026871402,
+    "n": 1042,
+    "image_level_accuracy": 0.8103448275862069
+  }
+}

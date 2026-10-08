@@ -1,0 +1,13 @@
+{
+  "name": "maize_water",
+  "classes": [
+    "Healthy",
+    "Mild stress",
+    "Severe stress"
+  ],
+  "input_size": 48,
+  "test": {
+    "accuracy": 0.7251442704039571,
+    "n": 6065
+  }
+}
