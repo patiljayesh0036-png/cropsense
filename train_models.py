@@ -113,7 +113,8 @@ def class_weights(y, n):
     return {i: float(v) for i, v in enumerate(w)}
 
 
-def train_two_stage(model, base, train_ds, val_ds, cw, epochs1, epochs2):
+def train_two_stage(model, base, train_ds, val_ds, cw, epochs1, epochs2,
+                    fine_tune_layers=FINE_TUNE_LAYERS, lr2=1e-5, patience=3):
     """Stage 1: train only the new head. Stage 2: fine-tune the top of MobileNetV2."""
     if QUICK:
         epochs1, epochs2 = 1, 1
@@ -121,7 +122,7 @@ def train_two_stage(model, base, train_ds, val_ds, cw, epochs1, epochs2):
     if val_ds is not None:
         callbacks.append(
             keras.callbacks.EarlyStopping(
-                monitor="val_loss", patience=3, restore_best_weights=True
+                monitor="val_loss", patience=patience, restore_best_weights=True
             )
         )
 
@@ -138,12 +139,12 @@ def train_two_stage(model, base, train_ds, val_ds, cw, epochs1, epochs2):
 
     print("  -- stage 2: fine-tuning top layers")
     base.trainable = True
-    for layer in base.layers[:-FINE_TUNE_LAYERS]:
+    for layer in base.layers[:-fine_tune_layers]:
         layer.trainable = False
     for layer in base.layers:
         if isinstance(layer, layers.BatchNormalization):
             layer.trainable = False
-    _compile(model, 1e-5)
+    _compile(model, lr2)
     merge(model.fit(train_ds, validation_data=val_ds, epochs=epochs2,
                     class_weight=cw, callbacks=callbacks, verbose=2))
     return history
@@ -383,9 +384,18 @@ def write_fusion_config():
 # ============================================================================
 # 3 + 5. Nutrient deficiency (rice and maize) - image folders, tiled
 # ============================================================================
+# Settings per crop. Rice uses bigger tiles and deeper fine-tuning (v2); maize is unchanged.
+NUTRIENT_CONFIG = {
+    "rice": dict(size=224, fine_tune=100, lr2=3e-5, epochs1=8, epochs2=15, patience=4),
+    "maize": dict(size=C.IMG_SIZE, fine_tune=FINE_TUNE_LAYERS, lr2=1e-5, epochs1=8, epochs2=10, patience=3),
+}
+
+
 def run_nutrients(crop):
     key = f"{crop}_nutrients"
-    print(f"\n=== {key} ===")
+    cfg = NUTRIENT_CONFIG[crop]
+    size = cfg["size"]
+    print(f"\n=== {key} (tile size {size}, fine-tuning {cfg['fine_tune']} layers) ===")
     root = C.resolve_dataset(key)
     files, y, classes = load_class_folders(root)
     n = len(classes)
@@ -398,7 +408,7 @@ def run_nutrients(crop):
     def build_split(ids):
         tiles, labels, groups = [], [], []
         for i in ids:
-            t = C.tile_image(C.open_image(files[i]), C.IMG_SIZE)
+            t = C.tile_image(C.open_image(files[i]), size)
             tiles.append(t)
             labels += [y[i]] * len(t)
             groups += [i] * len(t)
@@ -411,15 +421,16 @@ def run_nutrients(crop):
     print(f"  images  train/val/test = {len(tr_i)}/{len(va_i)}/{len(te_i)}")
     print(f"  samples train/val/test = {len(ytr)}/{len(yva)}/{len(yte)}")
 
-    model, base = build_model(n, C.IMG_SIZE)
+    model, base = build_model(n, size)
     hist = train_two_stage(
         model, base,
         make_ds(Xtr, ytr, shuffle=True), make_ds(Xva, yva),
-        class_weights(ytr, n), epochs1=8, epochs2=10,
+        class_weights(ytr, n), epochs1=cfg["epochs1"], epochs2=cfg["epochs2"],
+        fine_tune_layers=cfg["fine_tune"], lr2=cfg["lr2"], patience=cfg["patience"],
     )
     save_history(hist, key, f"{key}_history.png")
     res = evaluate(f"{key}_test", predict_probs(model, Xte), yte, classes, groups=gte)
-    save_model(model, key, classes, C.IMG_SIZE, {"test": res})
+    save_model(model, key, classes, size, {"test": res, "settings": cfg})
 
 
 # ============================================================================
