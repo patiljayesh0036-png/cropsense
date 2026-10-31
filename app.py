@@ -42,7 +42,7 @@ if os.environ.get("TRUST_PROXY") == "1":
 # ----------------------------------------------------------------------------
 # Settings
 # ----------------------------------------------------------------------------
-LOW_CONFIDENCE = 0.55        # below this the app warns the user
+LOW_CONFIDENCE = 0.60        # below this the app warns the user
 MODEL_NAMES = ["rice_water_rgb", "rice_water_thermal", "rice_nutrients",
                "maize_water", "maize_nutrients"]
 
@@ -295,7 +295,8 @@ def as_dict(classes, probs):
 # ----------------------------------------------------------------------------
 def predict_nutrients(crop, img):
     bundle = load_bundle(f"{crop}_nutrients")
-    tiles = C.tile_image(img, C.IMG_SIZE)             # same tiling as training
+    size = int(bundle["meta"].get("input_size", C.IMG_SIZE))   # tile size the model was trained with
+    tiles = C.tile_image(img, size)                   # same tiling as training
     probs = cnn_probs(bundle, tiles).mean(axis=0)     # average over tiles
     warns = []
     if crop == "rice":
