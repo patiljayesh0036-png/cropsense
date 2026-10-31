@@ -1,79 +1,76 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#1f6b45">
-  <title>CropSense - Crop stress and nutrient deficiency detection for rice and maize</title>
+  <meta name="theme-color" content="#080f0a">
+  <title>CropSense - AI-Powered Crop Stress & Nutrient Detection</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Figtree:wght@400;500;600&display=swap" rel="stylesheet">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&family=Outfit:wght@300;400;500;600;700&display=swap"
+    rel="stylesheet">
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
+
 <body>
+  <!-- Three.js Canvas Container -->
+  <div id="three-canvas-container" aria-hidden="true"></div>
+
+  <!-- Floating Particles Overlay -->
+  <div id="particles-overlay" aria-hidden="true"></div>
 
   <header class="topbar">
     <div class="container topbar-inner">
       <a class="brand" href="#top" aria-label="CropSense home">
         <span class="brand-mark" aria-hidden="true">
-          <svg viewBox="0 0 24 24"><path d="M12 2.5C7 6 5 10 5 13.5a7 7 0 0 0 14 0C19 10 17 6 12 2.5Z" fill="#cfe96b"/><path d="M12 7v14M12 13l-3.5-3M12 16.5l4-3.5" stroke="#10231a" stroke-width="1.6" stroke-linecap="round" fill="none"/></svg>
+          <svg viewBox="0 0 24 24">
+            <path d="M12 2.5C7 6 5 10 5 13.5a7 7 0 0 0 14 0C19 10 17 6 12 2.5Z" fill="#b8f53a" />
+            <path d="M12 7v14M12 13l-3.5-3M12 16.5l4-3.5" stroke="#080f0a" stroke-width="1.6" stroke-linecap="round"
+              fill="none" />
+          </svg>
         </span>
         <span class="brand-name">CropSense</span>
       </a>
       <nav class="topnav" aria-label="Main">
-        <a href="#analyse">Check a crop</a>
-        <a href="#models">Model accuracy</a>
+        <a href="#analyse">Check Crop</a>
+        <a href="#models">Model Accuracy</a>
       </nav>
     </div>
   </header>
 
   <main id="top">
 
-    <!-- ===== Hero ===== -->
+    <!-- ===== Hero with 3D Scene ===== -->
     <section class="hero">
       <div class="container hero-grid">
         <div class="hero-copy">
-          <h1>Find water stress and nutrient deficiency in rice and maize</h1>
-          <p class="lead">Upload a photo of the plant. CropSense tells you what it sees, how sure it is, and what to do next with irrigation or fertilizer.</p>
-          <div class="hero-actions">
-            <a class="btn-link" href="#analyse">Start a check</a>
-            <a class="link-quiet" href="#models">See how accurate it is</a>
+          <div class="hero-eyebrow">
+            <span class="eyebrow-dot" aria-hidden="true"></span>
+            AI Powered Diagnostics
           </div>
-          <p class="hero-note">Works with ordinary phone photos. No sign-up needed.</p>
+          <h1>Detect stress & <br>deficiency in <span class="accent">Rice & Maize</span></h1>
+          <p class="lead">Upload a photo of the plant. CropSense instantly analyzes the image, identifies issues, and
+            provides actionable recommendations for irrigation or fertilizer.</p>
+          <div class="hero-actions">
+            <a class="btn-link" href="#analyse">Start Analysis</a>
+            <a class="link-quiet" href="#models">View Model Accuracy</a>
+          </div>
+          <p class="hero-note">Works with standard smartphone photos. No sign-up required.</p>
+
         </div>
 
-        <figure class="hero-art">
-          <svg viewBox="0 0 420 500" class="leaf-art" role="img" aria-label="A leaf inside a camera frame with one yellowed area marked as an example nitrogen deficiency">
-            <defs>
-              <linearGradient id="leafG" x1="0" y1="0" x2="1" y2="1">
-                <stop offset="0" stop-color="#318f5c"/>
-                <stop offset="1" stop-color="#14543a"/>
-              </linearGradient>
-              <clipPath id="leafClip"><path d="M210 36C340 120 366 300 210 462C54 300 80 120 210 36Z"/></clipPath>
-            </defs>
-            <g fill="none" stroke="#10231a" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M22 66V22h44"/><path d="M354 22h44v44"/><path d="M22 434v44h44"/><path d="M398 434v44h-44"/>
-            </g>
-            <path d="M210 36C340 120 366 300 210 462C54 300 80 120 210 36Z" fill="url(#leafG)"/>
-            <g clip-path="url(#leafClip)">
-              <ellipse cx="268" cy="156" rx="74" ry="50" transform="rotate(-28 268 156)" fill="#cfe96b" opacity=".92"/>
-              <g stroke="#d6efdc" stroke-opacity=".5" stroke-width="2" fill="none" stroke-linecap="round">
-                <path d="M210 48V458"/>
-                <path d="M210 128C176 142 146 166 120 202"/><path d="M210 128C244 142 274 166 300 202"/>
-                <path d="M210 210C170 226 138 254 116 296"/><path d="M210 210C250 226 282 254 304 296"/>
-                <path d="M210 292C178 306 154 330 138 364"/><path d="M210 292C242 306 266 330 282 364"/>
-              </g>
-              <rect class="scan" x="40" y="0" width="340" height="4" rx="2" fill="#cfe96b"/>
-            </g>
-            <circle cx="268" cy="156" r="10" fill="none" stroke="#10231a" stroke-width="2.5"/>
-            <path d="M276 149L318 112" stroke="#10231a" stroke-width="2" stroke-linecap="round"/>
-            <g transform="translate(278 58)">
-              <rect width="112" height="52" rx="8" fill="#fcfdfa" stroke="#10231a" stroke-width="1.5"/>
-              <text x="12" y="22" class="art-label">Nitrogen</text>
-              <text x="12" y="40" class="art-sub">Example result</text>
-            </g>
-          </svg>
+        <figure class="hero-art" style="display:none;" aria-hidden="true">
         </figure>
+      </div>
+
+      <!-- Scroll Indicator -->
+      <div class="scroll-indicator" aria-hidden="true">
+        <svg viewBox="0 0 24 24" width="24" height="24">
+          <path d="M12 4v16M8 12l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+            stroke-linejoin="round" />
+        </svg>
       </div>
     </section>
 
@@ -81,8 +78,8 @@
     <section id="analyse" class="analyse">
       <div class="container">
         <div class="section-head">
-          <h2>Check a crop</h2>
-          <p>Three quick steps. You get a result in a few seconds.</p>
+          <h2>Diagnostic Analysis</h2>
+          <p>Complete these three quick steps to receive an instant analysis of your crop.</p>
         </div>
 
         <div class="analyse-grid">
@@ -91,24 +88,45 @@
 
             <!-- Step 1 -->
             <section class="step" id="card-crop">
-              <span class="step-num"><span class="n">1</span><svg class="ck" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+              <span class="step-num"><span class="n">1</span><svg class="ck" viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M5 12.5l4.5 4.5L19 7.5" fill="none" stroke="currentColor" stroke-width="3"
+                    stroke-linecap="round" stroke-linejoin="round" />
+                </svg></span>
               <div class="step-body">
-                <h3>Which crop is it?</h3>
+                <h3>Select Crop Type</h3>
                 <div class="choice-grid" role="radiogroup" aria-label="Crop">
                   <label class="choice">
                     <input type="radio" name="crop" value="rice">
                     <span class="choice-body">
-                      <svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 22V8" /><path d="M12 8C9 7.5 7.5 5.5 7.5 3c3 .5 4.5 2.5 4.5 5Z"/><path d="M12 8c3-.5 4.5-2.5 4.5-5-3 .5-4.5 2.5-4.5 5Z"/><path d="M12 15c-3 0-5-2-5.5-5 3 0 5 2 5.5 5Z"/><path d="M12 15c3 0 5-2 5.5-5-3 0-5 2-5.5 5Z"/></svg>
+                      <svg class="ic" viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="M12 22V8" />
+                        <path d="M12 8C9 7.5 7.5 5.5 7.5 3c3 .5 4.5 2.5 4.5 5Z" />
+                        <path d="M12 8c3-.5 4.5-2.5 4.5-5-3 .5-4.5 2.5-4.5 5Z" />
+                        <path d="M12 15c-3 0-5-2-5.5-5 3 0 5 2 5.5 5Z" />
+                        <path d="M12 15c3 0 5-2 5.5-5-3 0-5 2-5.5 5Z" />
+                      </svg>
                       <span class="choice-text"><strong>Rice</strong><small>Paddy crop</small></span>
-                      <svg class="tick" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="11" fill="currentColor"/><path d="M7 12.5l3.5 3.5L17 9" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                      <svg class="tick" viewBox="0 0 24 24" aria-hidden="true">
+                        <circle cx="12" cy="12" r="11" fill="currentColor" />
+                        <path d="M7 12.5l3.5 3.5L17 9" fill="none" stroke="#080f0a" stroke-width="2.4"
+                          stroke-linecap="round" stroke-linejoin="round" />
+                      </svg>
                     </span>
                   </label>
                   <label class="choice">
                     <input type="radio" name="crop" value="maize">
                     <span class="choice-body">
-                      <svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3c3 2 4 6 4 10s-1 6-4 8c-3-2-4-4-4-8s1-8 4-10Z"/><path d="M12 3v18M8.4 8h7.2M8 13h8M9 17.5h6"/><path d="M8 21c-3-1-5-4-5-7 3 1 5 3 5 7Z"/></svg>
+                      <svg class="ic" viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="M12 3c3 2 4 6 4 10s-1 6-4 8c-3-2-4-4-4-8s1-8 4-10Z" />
+                        <path d="M12 3v18M8.4 8h7.2M8 13h8M9 17.5h6" />
+                        <path d="M8 21c-3-1-5-4-5-7 3 1 5 3 5 7Z" />
+                      </svg>
                       <span class="choice-text"><strong>Maize</strong><small>Corn crop</small></span>
-                      <svg class="tick" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="11" fill="currentColor"/><path d="M7 12.5l3.5 3.5L17 9" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                      <svg class="tick" viewBox="0 0 24 24" aria-hidden="true">
+                        <circle cx="12" cy="12" r="11" fill="currentColor" />
+                        <path d="M7 12.5l3.5 3.5L17 9" fill="none" stroke="#080f0a" stroke-width="2.4"
+                          stroke-linecap="round" stroke-linejoin="round" />
+                      </svg>
                     </span>
                   </label>
                 </div>
@@ -117,24 +135,41 @@
 
             <!-- Step 2 -->
             <section class="step" id="card-module">
-              <span class="step-num"><span class="n">2</span><svg class="ck" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+              <span class="step-num"><span class="n">2</span><svg class="ck" viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M5 12.5l4.5 4.5L19 7.5" fill="none" stroke="currentColor" stroke-width="3"
+                    stroke-linecap="round" stroke-linejoin="round" />
+                </svg></span>
               <div class="step-body">
-                <h3>What do you want to check?</h3>
+                <h3>Select Check Type</h3>
                 <div class="choice-grid" role="radiogroup" aria-label="Type of check">
                   <label class="choice">
                     <input type="radio" name="module" value="water_stress">
                     <span class="choice-body">
-                      <svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3c4 5 6 8 6 11a6 6 0 0 1-12 0c0-3 2-6 6-11Z"/><path d="M9.5 14.5a2.6 2.6 0 0 0 2.5 2.5"/></svg>
-                      <span class="choice-text"><strong>Water stress</strong><small>Is it getting enough water?</small></span>
-                      <svg class="tick" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="11" fill="currentColor"/><path d="M7 12.5l3.5 3.5L17 9" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                      <svg class="ic" viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="M12 3c4 5 6 8 6 11a6 6 0 0 1-12 0c0-3 2-6 6-11Z" />
+                        <path d="M9.5 14.5a2.6 2.6 0 0 0 2.5 2.5" />
+                      </svg>
+                      <span class="choice-text"><strong>Water Stress</strong><small>Hydration levels</small></span>
+                      <svg class="tick" viewBox="0 0 24 24" aria-hidden="true">
+                        <circle cx="12" cy="12" r="11" fill="currentColor" />
+                        <path d="M7 12.5l3.5 3.5L17 9" fill="none" stroke="#080f0a" stroke-width="2.4"
+                          stroke-linecap="round" stroke-linejoin="round" />
+                      </svg>
                     </span>
                   </label>
                   <label class="choice">
                     <input type="radio" name="module" value="nutrients">
                     <span class="choice-body">
-                      <svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 3h6M10 3v6l-5 9a2 2 0 0 0 1.8 3h10.4a2 2 0 0 0 1.8-3l-5-9V3"/><path d="M7.5 15h9"/></svg>
-                      <span class="choice-text"><strong>Nutrient deficiency</strong><small>Is a nutrient missing?</small></span>
-                      <svg class="tick" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="11" fill="currentColor"/><path d="M7 12.5l3.5 3.5L17 9" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                      <svg class="ic" viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="M9 3h6M10 3v6l-5 9a2 2 0 0 0 1.8 3h10.4a2 2 0 0 0 1.8-3l-5-9V3" />
+                        <path d="M7.5 15h9" />
+                      </svg>
+                      <span class="choice-text"><strong>Nutrients</strong><small>Deficiency check</small></span>
+                      <svg class="tick" viewBox="0 0 24 24" aria-hidden="true">
+                        <circle cx="12" cy="12" r="11" fill="currentColor" />
+                        <path d="M7 12.5l3.5 3.5L17 9" fill="none" stroke="#080f0a" stroke-width="2.4"
+                          stroke-linecap="round" stroke-linejoin="round" />
+                      </svg>
                     </span>
                   </label>
                 </div>
@@ -143,41 +178,55 @@
 
             <!-- Step 3 -->
             <section class="step" id="card-upload">
-              <span class="step-num"><span class="n">3</span><svg class="ck" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+              <span class="step-num"><span class="n">3</span><svg class="ck" viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M5 12.5l4.5 4.5L19 7.5" fill="none" stroke="currentColor" stroke-width="3"
+                    stroke-linecap="round" stroke-linejoin="round" />
+                </svg></span>
               <div class="step-body">
-                <h3>Add your photo</h3>
+                <h3>Upload Image</h3>
                 <p id="hint" class="hint">Choose a crop and a type of check above, then add your photo here.</p>
 
                 <div class="upload-grid">
                   <div class="upload-col">
-                    <span class="upload-label" id="label-rgb">Photo</span>
+                    <span class="upload-label" id="label-rgb">Standard Photo</span>
                     <div class="dropzone" id="drop-rgb" tabindex="0" role="button" aria-labelledby="label-rgb">
                       <input type="file" id="file-rgb" accept="image/*" hidden>
                       <div class="dz-empty">
-                        <svg viewBox="0 0 24 24" class="dz-icon" aria-hidden="true"><path d="M4 8a2 2 0 0 1 2-2h1.5l1.2-1.8A1 1 0 0 1 9.5 4h5a1 1 0 0 1 .8.2L16.5 6H18a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8Z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><circle cx="12" cy="12.5" r="3.4" fill="none" stroke="currentColor" stroke-width="1.7"/></svg>
-                        <span class="dz-main">Drop a photo here or <u>browse</u></span>
-                        <span class="dz-sub">JPG, PNG or WEBP, up to 16 MB</span>
+                        <svg viewBox="0 0 24 24" class="dz-icon" aria-hidden="true">
+                          <path
+                            d="M4 8a2 2 0 0 1 2-2h1.5l1.2-1.8A1 1 0 0 1 9.5 4h5a1 1 0 0 1 .8.2L16.5 6H18a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8Z"
+                            fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" />
+                          <circle cx="12" cy="12.5" r="3.4" fill="none" stroke="currentColor" stroke-width="1.7" />
+                        </svg>
+                        <span class="dz-main">Drop photo here or <u>browse</u></span>
+                        <span class="dz-sub">JPG, PNG or WEBP up to 16 MB</span>
                       </div>
                       <div class="dz-preview" hidden>
                         <img id="preview-rgb" alt="Preview of your uploaded photo">
-                        <button type="button" class="dz-remove" data-kind="rgb" aria-label="Remove photo">&times;</button>
+                        <button type="button" class="dz-remove" data-kind="rgb"
+                          aria-label="Remove photo">&times;</button>
                         <span class="dz-name" id="name-rgb"></span>
                       </div>
                     </div>
                   </div>
 
                   <div class="upload-col" id="thermal-col" hidden>
-                    <span class="upload-label" id="label-thermal">Thermal image <em>(optional)</em></span>
+                    <span class="upload-label" id="label-thermal">Thermal Image <em>(Optional)</em></span>
                     <div class="dropzone" id="drop-thermal" tabindex="0" role="button" aria-labelledby="label-thermal">
                       <input type="file" id="file-thermal" accept="image/*" hidden>
                       <div class="dz-empty">
-                        <svg viewBox="0 0 24 24" class="dz-icon" aria-hidden="true"><path d="M10 14.5V5a2 2 0 1 1 4 0v9.5a4 4 0 1 1-4 0Z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><circle cx="12" cy="17" r="1.6" fill="currentColor"/></svg>
-                        <span class="dz-main">Drop a thermal image or <u>browse</u></span>
-                        <span class="dz-sub">Adds a small share to the result</span>
+                        <svg viewBox="0 0 24 24" class="dz-icon" aria-hidden="true">
+                          <path d="M10 14.5V5a2 2 0 1 1 4 0v9.5a4 4 0 1 1-4 0Z" fill="none" stroke="currentColor"
+                            stroke-width="1.7" stroke-linejoin="round" />
+                          <circle cx="12" cy="17" r="1.6" fill="currentColor" />
+                        </svg>
+                        <span class="dz-main">Drop thermal image or <u>browse</u></span>
+                        <span class="dz-sub">Enhances stress detection</span>
                       </div>
                       <div class="dz-preview" hidden>
                         <img id="preview-thermal" alt="Preview of your uploaded thermal image">
-                        <button type="button" class="dz-remove" data-kind="thermal" aria-label="Remove thermal image">&times;</button>
+                        <button type="button" class="dz-remove" data-kind="thermal"
+                          aria-label="Remove thermal image">&times;</button>
                         <span class="dz-name" id="name-thermal"></span>
                       </div>
                     </div>
@@ -188,21 +237,32 @@
 
                 <button type="submit" id="analyze-btn" class="btn-primary" disabled>
                   <span class="btn-spinner" aria-hidden="true"></span>
-                  <span id="btn-text">Analyse</span>
+                  <span id="btn-text">Run Analysis</span>
                 </button>
               </div>
             </section>
           </form>
 
           <aside class="tips" aria-label="Photo tips">
-            <h3>For a reliable result</h3>
+            <div class="tips-header">
+              <div class="tips-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="var(--lime)" stroke-width="2" stroke-linecap="round"
+                  stroke-linejoin="round">
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <line x1="12" y1="16" x2="12" y2="12"></line>
+                  <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                </svg>
+              </div>
+              <h3>Photography Tips</h3>
+            </div>
             <ul>
               <li><strong>Use daylight.</strong> Avoid flash and hard shadows across the leaf.</li>
               <li><strong>Get close.</strong> Fill the frame with one leaf or a small group of plants.</li>
               <li><strong>Keep it sharp.</strong> Hold the phone steady so the leaf veins are clear.</li>
               <li><strong>One crop per photo.</strong> Do not mix rice and maize in the same picture.</li>
             </ul>
-            <p class="tips-note">The result is a screening aid. A soil test or a visit from an agriculture officer gives the final answer.</p>
+            <p class="tips-note">Note: Results act as a screening aid. Always consult an agricultural expert for final
+              confirmation.</p>
           </aside>
         </div>
 
@@ -212,7 +272,7 @@
             <div class="gauge" id="result-gauge" role="img" aria-label="Confidence of the result">
               <div class="gauge-inner">
                 <span class="gauge-value" id="result-confidence">0%</span>
-                <span class="gauge-label">confident</span>
+                <span class="gauge-label">Confidence</span>
               </div>
             </div>
             <div class="result-headtext">
@@ -224,9 +284,19 @@
               <p class="result-sub" id="result-sub"></p>
             </div>
             <div class="status-ic" aria-hidden="true">
-              <svg class="ic-good" viewBox="0 0 24 24"><circle cx="12" cy="12" r="11" fill="currentColor"/><path d="M7 12.5l3.5 3.5L17 9" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
-              <svg class="ic-warn" viewBox="0 0 24 24"><path d="M12 2.5 22.5 21h-21L12 2.5Z" fill="currentColor"/><path d="M12 9.5v5M12 17.6v.1" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/></svg>
-              <svg class="ic-alert" viewBox="0 0 24 24"><circle cx="12" cy="12" r="11" fill="currentColor"/><path d="M12 6.5v7M12 17v.1" stroke="#fff" stroke-width="2.6" stroke-linecap="round"/></svg>
+              <svg class="ic-good" viewBox="0 0 24 24">
+                <circle cx="12" cy="12" r="11" fill="currentColor" />
+                <path d="M7 12.5l3.5 3.5L17 9" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round"
+                  stroke-linejoin="round" />
+              </svg>
+              <svg class="ic-warn" viewBox="0 0 24 24">
+                <path d="M12 2.5 22.5 21h-21L12 2.5Z" fill="currentColor" />
+                <path d="M12 9.5v5M12 17.6v.1" stroke="#fff" stroke-width="2.4" stroke-linecap="round" />
+              </svg>
+              <svg class="ic-alert" viewBox="0 0 24 24">
+                <circle cx="12" cy="12" r="11" fill="currentColor" />
+                <path d="M12 6.5v7M12 17v.1" stroke="#fff" stroke-width="2.6" stroke-linecap="round" />
+              </svg>
             </div>
           </div>
 
@@ -234,31 +304,31 @@
 
           <div class="result-cols">
             <div class="result-block">
-              <h3>How likely is each answer?</h3>
+              <h3>Probability Breakdown</h3>
               <ul class="prob-list" id="prob-list"></ul>
             </div>
 
             <div class="result-block rec" id="rec-block">
-              <h3 id="rec-title">What to do</h3>
+              <h3 id="rec-title">Recommended Action</h3>
               <ul id="rec-actions" class="rec-actions"></ul>
             </div>
           </div>
 
           <div class="result-block notes" id="warnings-block" hidden>
-            <h3>Keep in mind</h3>
+            <h3>Important Notes</h3>
             <ul id="warnings" class="warnings"></ul>
           </div>
 
           <details id="tech-details" class="tech" hidden>
-            <summary>See how the models voted</summary>
+            <summary>Technical Details & Model Votes</summary>
             <div id="details-body"></div>
           </details>
 
           <p id="disclaimer" class="disclaimer"></p>
 
           <div class="result-actions no-print">
-            <button type="button" id="reset-btn" class="btn-secondary">Check another photo</button>
-            <button type="button" id="print-btn" class="btn-quiet">Print or save as PDF</button>
+            <button type="button" id="reset-btn" class="btn-secondary">Check Another Photo</button>
+            <button type="button" id="print-btn" class="btn-quiet">Print Report</button>
           </div>
         </section>
       </div>
@@ -268,47 +338,54 @@
     <section id="models" class="models">
       <div class="container">
         <div class="section-head">
-          <h2>How accurate is it?</h2>
-          <p>These figures come from images the models never saw during training. Small datasets give rough estimates, so treat them as a guide.</p>
+          <h2>Model Accuracy Metrics</h2>
+          <p>These figures are derived from testing on data not seen during training. Consider them baseline estimates.
+          </p>
         </div>
 
         <div class="table-wrap">
           <table class="acc-table">
             <thead>
-              <tr><th scope="col">Check</th><th scope="col">Images used</th><th scope="col">Measured accuracy</th><th scope="col">Worth knowing</th></tr>
+              <tr>
+                <th scope="col">Check Type</th>
+                <th scope="col">Dataset Size</th>
+                <th scope="col">Accuracy</th>
+                <th scope="col">Notes</th>
+              </tr>
             </thead>
             <tbody>
-              <!-- Update these numbers if you retrain the models -->
               <tr>
-              
-                <th scope="row" data-label="Check">Rice, water stress (photo)</th>
-                <td data-label="Images used">90 photos</td>
-                <td data-label="Measured accuracy"><span class="acc">83%</span> in 5-fold cross-validation</td>
-                <td data-label="Worth knowing">Uses a colour-based model, which beat the deep network (76%) on this small set. Mild stress is the hardest class.</td>
+                <th scope="row" data-label="Check Type">Rice, Water Stress (Photo)</th>
+                <td data-label="Dataset Size">90 photos</td>
+                <td data-label="Accuracy"><span class="acc">83%</span> (5-fold CV)</td>
+                <td data-label="Notes">Uses a color-based model, outperforming the deep network (76%). Mild stress is
+                  hardest to detect.</td>
               </tr>
               <tr>
-                <th scope="row" data-label="Check">Rice, water stress (thermal)</th>
-                <td data-label="Images used">100 thermal images</td>
-                <td data-label="Measured accuracy"><span class="acc acc-low">47%</span> in 5-fold cross-validation</td>
-                <td data-label="Worth knowing">About the same as always guessing the biggest class, so it only adds a small share to the result.</td>
+                <th scope="row" data-label="Check Type">Rice, Water Stress (Thermal)</th>
+                <td data-label="Dataset Size">100 thermal images</td>
+                <td data-label="Accuracy"><span class="acc acc-low">47%</span> (5-fold CV)</td>
+                <td data-label="Notes">Performs similarly to majority-class guessing. Acts as a minor supplemental
+                  signal.</td>
               </tr>
               <tr>
                 <th scope="row" data-label="Check">Rice, nutrient deficiency</th>
                 <td data-label="Images used">1,156 leaf photos</td>
-                <td data-label="Measured accuracy"><span class="acc">81%</span> per photo on held-out images</td>
-                <td data-label="Worth knowing">Phosphorus is often mistaken for nitrogen. It cannot recognise a healthy leaf.</td>
+                <td data-label="Measured accuracy"><span class="acc">85%</span> per photo on held-out images</td>
+                <td data-label="Worth knowing">Phosphorus is the weakest class: the model still misses about half of
+                  phosphorus samples. It cannot recognise a healthy leaf.</td>
               </tr>
               <tr>
-                <th scope="row" data-label="Check">Maize, water stress</th>
-                <td data-label="Images used">18,040 small images</td>
-                <td data-label="Measured accuracy"><span class="acc">73%</span> on a separate test set</td>
-                <td data-label="Worth knowing">Healthy and severe stress are found well. Mild stress is often confused with the others.</td>
+                <th scope="row" data-label="Check Type">Maize, Water Stress</th>
+                <td data-label="Dataset Size">18,040 patch images</td>
+                <td data-label="Accuracy"><span class="acc">73%</span> (Test set)</td>
+                <td data-label="Notes">Strong on healthy/severe. Mild stress classes often overlap.</td>
               </tr>
               <tr>
-                <th scope="row" data-label="Check">Maize, nutrient deficiency</th>
-                <td data-label="Images used">463 leaf photos</td>
-                <td data-label="Measured accuracy"><span class="acc">83%</span> per photo on held-out images</td>
-                <td data-label="Worth knowing">Potassium has the fewest images and is the least reliable class.</td>
+                <th scope="row" data-label="Check Type">Maize, Nutrient Deficiency</th>
+                <td data-label="Dataset Size">463 leaf photos</td>
+                <td data-label="Accuracy"><span class="acc">83%</span> (Held-out)</td>
+                <td data-label="Notes">Potassium is the least reliable class due to data scarcity.</td>
               </tr>
             </tbody>
           </table>
@@ -320,13 +397,37 @@
   <footer class="site-footer">
     <div class="container footer-inner">
       <div>
-        <strong>CropSense</strong>
-        <p>A final year BE project on AI-powered crop stress and nutrient deficiency detection for rice and maize.</p>
+        <div class="footer-brand">
+          <svg viewBox="0 0 24 24" width="24" height="24">
+            <path d="M12 2.5C7 6 5 10 5 13.5a7 7 0 0 0 14 0C19 10 17 6 12 2.5Z" fill="#b8f53a" />
+            <path d="M12 7v14M12 13l-3.5-3M12 16.5l4-3.5" stroke="#080f0a" stroke-width="1.6" stroke-linecap="round"
+              fill="none" />
+          </svg>
+          <strong>CropSense</strong>
+        </div>
+        <p>AI-powered crop diagnostics for modern agriculture.</p>
       </div>
-      <p class="footer-note">Predictions come from machine-learning models and can be wrong. Confirm with an agriculture expert before you act.</p>
+      <p class="footer-note">Predictions are machine-generated and may contain inaccuracies. Verify critical decisions
+        with an agronomist.</p>
     </div>
   </footer>
 
+  <!-- Load Three.js from CDN -->
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+    }
+  }
+  </script>
+
+  <!-- GSAP for animations -->
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
+
+  <script src="{{ url_for('static', filename='3d-scene.js') }}"></script>
   <script src="{{ url_for('static', filename='app.js') }}"></script>
 </body>
+
 </html>

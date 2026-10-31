@@ -1,4 +1,4 @@
-/* ===== CropSense - front-end logic ===== */
+/* ===== CropSense - Frontend Logic with 3D Integration ===== */
 (() => {
   "use strict";
 
@@ -42,6 +42,22 @@
     state.crop === "rice" && state.module === "water_stress";
   const ready = () => Boolean(state.crop && state.module && state.files.rgb);
 
+  /* ---------- safe animation helper ---------- */
+  const safeGsap = {
+    from: (target, vars) => {
+      if (typeof gsap !== "undefined" && gsap && typeof gsap.from === "function") {
+        try { return gsap.from(target, vars); } catch (e) { /* ignore animation error */ }
+      }
+    },
+    to: (target, vars) => {
+      if (typeof gsap !== "undefined" && gsap && typeof gsap.to === "function") {
+        try { return gsap.to(target, vars); } catch (e) { /* ignore animation error */ }
+      } else if (vars && typeof vars.onComplete === "function") {
+        vars.onComplete();
+      }
+    }
+  };
+
   /* ---------- small helpers ---------- */
   function el(tag, className, text) {
     const node = document.createElement(tag);
@@ -54,6 +70,7 @@
   function showError(message) {
     errorBox.textContent = message;
     errorBox.hidden = false;
+    safeGsap.from(errorBox, { opacity: 0, y: -10, duration: 0.3, ease: "power2.out" });
   }
   function hideError() {
     errorBox.hidden = true;
@@ -62,8 +79,24 @@
 
   /* ---------- selection ---------- */
   function updateUI() {
+    // Sync state with DOM in case radio buttons or inputs were selected
+    if (!state.crop) {
+      const checkedCrop = form ? form.querySelector('input[name="crop"]:checked') : null;
+      if (checkedCrop) state.crop = checkedCrop.value;
+    }
+    if (!state.module) {
+      const checkedModule = form ? form.querySelector('input[name="module"]:checked') : null;
+      if (checkedModule) state.module = checkedModule.value;
+    }
+    if (!state.files.rgb) {
+      const rgbInput = $("file-rgb");
+      if (rgbInput && rgbInput.files && rgbInput.files[0]) {
+        state.files.rgb = rgbInput.files[0];
+      }
+    }
+
     if (state.crop && state.module) {
-      hint.textContent = HINTS[`${state.crop}|${state.module}`];
+      hint.textContent = HINTS[`${state.crop}|${state.module}`] || HINTS.partial;
     } else if (state.crop || state.module) {
       hint.textContent = HINTS.partial;
     } else {
@@ -71,14 +104,47 @@
     }
 
     const showThermal = needsThermal();
-    thermalCol.hidden = !showThermal;
+    if (thermalCol) {
+      thermalCol.hidden = !showThermal;
+    }
     if (!showThermal && state.files.thermal) clearFile("thermal");
 
-    $("card-crop").classList.toggle("is-done", Boolean(state.crop));
-    $("card-module").classList.toggle("is-done", Boolean(state.module));
-    $("card-upload").classList.toggle("is-done", ready());
+    const isReady = ready();
 
-    analyzeBtn.disabled = !ready();
+    const cropCard = $("card-crop");
+    if (cropCard) cropCard.classList.toggle("is-done", Boolean(state.crop));
+
+    const moduleCard = $("card-module");
+    if (moduleCard) moduleCard.classList.toggle("is-done", Boolean(state.module));
+
+    const uploadCard = $("card-upload");
+    if (uploadCard) uploadCard.classList.toggle("is-done", Boolean(state.files.rgb));
+
+    if (analyzeBtn) {
+      // Do not keep HTML disabled so user clicks are received and can guide the user
+      analyzeBtn.disabled = false;
+      analyzeBtn.setAttribute("aria-disabled", String(!isReady));
+      analyzeBtn.classList.toggle("is-unready", !isReady);
+      analyzeBtn.classList.toggle("is-ready", isReady);
+    }
+
+    // Animate step completion
+    if (state.crop) animateStepComplete("card-crop");
+    if (state.module) animateStepComplete("card-module");
+    if (state.files.rgb) animateStepComplete("card-upload");
+  }
+
+  function animateStepComplete(cardId) {
+    const card = $(cardId);
+    if (card && !card.dataset.animated) {
+      card.dataset.animated = "true";
+      safeGsap.from(card.querySelector(".step-num"), {
+        scale: 1.3,
+        rotation: 180,
+        duration: 0.6,
+        ease: "elastic.out(1, 0.5)",
+      });
+    }
   }
 
   form.addEventListener("change", (e) => {
@@ -90,10 +156,25 @@
     }
   });
 
+  // Also support direct click on choice cards
+  document.querySelectorAll(".choice").forEach((choice) => {
+    choice.addEventListener("click", () => {
+      const radio = choice.querySelector('input[type="radio"]');
+      if (radio && !radio.checked) {
+        radio.checked = true;
+        if (radio.name === "crop") state.crop = radio.value;
+        if (radio.name === "module") state.module = radio.value;
+        hideError();
+        updateUI();
+      }
+    });
+  });
+
   /* ---------- file upload ---------- */
   function setupDropzone(kind) {
     const zone = $(`drop-${kind}`);
     const input = $(`file-${kind}`);
+    if (!zone || !input) return;
 
     zone.addEventListener("click", (e) => {
       if (e.target.closest(".dz-remove")) return;
@@ -138,30 +219,62 @@
       showError("That image is larger than 16 MB. Choose a smaller photo.");
       return;
     }
-    state.files[kind] = file;
+    state.files[kind ] = file;
 
     const zone = $(`drop-${kind}`);
     const img = $(`preview-${kind}`);
-    if (img.dataset.url) URL.revokeObjectURL(img.dataset.url);
-    const url = URL.createObjectURL(file);
-    img.src = url;
-    img.dataset.url = url;
-    $(`name-${kind}`).textContent = file.name;
-    zone.querySelector(".dz-empty").hidden = true;
-    zone.querySelector(".dz-preview").hidden = false;
+    if (img) {
+      if (img.dataset.url) URL.revokeObjectURL(img.dataset.url);
+      const url = URL.createObjectURL(file);
+      img.src = url;
+      img.dataset.url = url;
+    }
+    const nameEl = $(`name-${kind}`);
+    if (nameEl) nameEl.textContent = file.name;
+
+    if (zone) {
+      const emptyEl = zone.querySelector(".dz-empty");
+      const previewEl = zone.querySelector(".dz-preview");
+      if (emptyEl) emptyEl.hidden = true;
+      if (previewEl) previewEl.hidden = false;
+    }
+
+    // Update UI state first so everything is marked ready immediately
     updateUI();
+
+    // Optional safe preview entrance animation
+    if (zone) {
+      const previewEl = zone.querySelector(".dz-preview");
+      if (previewEl) {
+        safeGsap.from(previewEl, {
+          opacity: 0,
+          scale: 0.95,
+          duration: 0.4,
+          ease: "power2.out",
+        });
+      }
+    }
   }
 
   function clearFile(kind) {
     state.files[kind] = null;
     const zone = $(`drop-${kind}`);
     const img = $(`preview-${kind}`);
-    if (img.dataset.url) URL.revokeObjectURL(img.dataset.url);
-    img.removeAttribute("src");
-    delete img.dataset.url;
-    $(`file-${kind}`).value = "";
-    zone.querySelector(".dz-empty").hidden = false;
-    zone.querySelector(".dz-preview").hidden = true;
+    if (img) {
+      if (img.dataset.url) URL.revokeObjectURL(img.dataset.url);
+      img.removeAttribute("src");
+      delete img.dataset.url;
+    }
+    const fileInput = $(`file-${kind}`);
+    if (fileInput) fileInput.value = "";
+
+    if (zone) {
+      const emptyEl = zone.querySelector(".dz-empty");
+      const previewEl = zone.querySelector(".dz-preview");
+      if (emptyEl) emptyEl.hidden = false;
+      if (previewEl) previewEl.hidden = true;
+      zone.dataset.animated = "false";
+    }
     updateUI();
   }
 
@@ -174,16 +287,47 @@
     }),
   );
 
+  analyzeBtn.addEventListener("click", (e) => {
+    if (!ready()) {
+      e.preventDefault();
+      if (!state.crop) {
+        showError("Please select a crop type (Rice or Maize) in Step 1.");
+        const c = $("card-crop");
+        if (c) c.scrollIntoView({ behavior: "smooth", block: "center" });
+      } else if (!state.module) {
+        showError("Please select a check type (Water Stress or Nutrients) in Step 2.");
+        const m = $("card-module");
+        if (m) m.scrollIntoView({ behavior: "smooth", block: "center" });
+      } else {
+        showError("Please upload a standard photo in Step 3 before running analysis.");
+        const u = $("card-upload");
+        if (u) u.scrollIntoView({ behavior: "smooth", block: "center" });
+      }
+      return;
+    }
+  });
+
   /* ---------- submit ---------- */
   function setLoading(isLoading) {
     analyzeBtn.classList.toggle("is-loading", isLoading);
-    analyzeBtn.disabled = isLoading || !ready();
-    btnText.textContent = isLoading ? "Analysing..." : "Analyse";
+    analyzeBtn.disabled = isLoading;
+    btnText.textContent = isLoading ? "Analysing..." : "Run Analysis";
+
+    if (isLoading) {
+      document.body.classList.add("analyzing");
+    } else {
+      document.body.classList.remove("analyzing");
+    }
   }
 
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
-    if (!ready()) return;
+    if (!ready()) {
+      if (!state.crop) showError("Please select a crop type (Rice or Maize) in Step 1.");
+      else if (!state.module) showError("Please select a check type (Water Stress or Nutrients) in Step 2.");
+      else showError("Please upload a standard photo in Step 3 before running analysis.");
+      return;
+    }
 
     hideError();
     setLoading(true);
@@ -231,9 +375,13 @@
     results.classList.remove("level-good", "level-warn", "level-alert");
     results.classList.add(`level-${level}`);
 
-    $("result-badge").textContent = LEVEL_TEXT[level] || "Result";
+    $("result-badge").textContent = data.low_confidence
+      ? "Not sure"
+      : LEVEL_TEXT[level] || "Result";
     $("result-lowconf").hidden = !data.low_confidence;
-    $("result-title").textContent = rec ? rec.title : data.prediction;
+    $("result-title").textContent =
+      (data.low_confidence ? "Best guess: " : "") +
+      (rec ? rec.title : data.prediction);
     $("result-sub").textContent = rec ? rec.summary : "";
     $("result-confidence").textContent = pct(data.confidence);
 
@@ -246,6 +394,16 @@
       `Confidence of the result: ${value} percent`,
     );
     results.hidden = false;
+
+    // Animate results entrance
+    safeGsap.from(results, {
+      opacity: 0,
+      y: 30,
+      scale: 0.98,
+      duration: 0.6,
+      ease: "power3.out",
+    });
+
     requestAnimationFrame(() =>
       requestAnimationFrame(() =>
         gauge.style.setProperty("--pct", String(value)),
@@ -256,13 +414,22 @@
     const imageBox = $("result-images");
     imageBox.replaceChildren();
     const captions = { image: "Your photo", thermal_image: "Thermal image" };
-    Object.entries(data.images || {}).forEach(([key, url]) => {
+    Object.entries(data.images || {}).forEach(([key, url], index) => {
       const fig = el("figure");
       const img = el("img");
       img.src = url;
       img.alt = captions[key] || "Uploaded image";
       fig.append(img, el("figcaption", "", captions[key] || ""));
       imageBox.append(fig);
+
+      safeGsap.from(fig, {
+        opacity: 0,
+        y: 20,
+        scale: 0.95,
+        duration: 0.5,
+        delay: index * 0.1,
+        ease: "power2.out",
+      });
     });
 
     // probabilities
@@ -284,6 +451,15 @@
           fill.style.width = pct(row.prob, 1);
         }),
       );
+
+      // Stagger animation
+      safeGsap.from(li, {
+        opacity: 0,
+        x: -20,
+        duration: 0.4,
+        delay: i * 0.08,
+        ease: "power2.out",
+      });
     });
 
     // recommendation
@@ -293,7 +469,25 @@
       $("rec-title").textContent = "What to do";
       const actions = $("rec-actions");
       actions.replaceChildren();
-      rec.actions.forEach((text) => actions.append(el("li", "", text)));
+      rec.actions.forEach((text, i) => {
+        const li = el("li", "", text);
+        actions.append(li);
+        safeGsap.from(li, {
+          opacity: 0,
+          x: 20,
+          duration: 0.4,
+          delay: i * 0.1,
+          ease: "power2.out",
+        });
+      });
+
+      safeGsap.from(recBlock, {
+        opacity: 0,
+        y: 20,
+        duration: 0.5,
+        delay: 0.3,
+        ease: "power2.out",
+      });
     }
 
     // warnings
@@ -304,6 +498,16 @@
       warnList.append(el("li", "", text)),
     );
     warnBlock.hidden = !(data.warnings && data.warnings.length);
+
+    if (!warnBlock.hidden) {
+      safeGsap.from(warnBlock, {
+        opacity: 0,
+        y: 20,
+        duration: 0.5,
+        delay: 0.4,
+        ease: "power2.out",
+      });
+    }
 
     renderDetails(data.details || {});
     $("disclaimer").textContent = data.disclaimer || "";
@@ -316,6 +520,20 @@
       block: "start",
     });
     $("result-title").focus({ preventScroll: true });
+
+    // Trigger 3D scene reaction to result
+    if (window.CropSense3D && window.CropSense3D.getHeroScene) {
+      triggerResultAnimation(level);
+    }
+  }
+
+  function triggerResultAnimation(level) {
+    const heroLeaf = document.querySelector("#hero-3d-leaf");
+    if (heroLeaf) {
+      heroLeaf.style.setProperty("--result-level", level);
+      heroLeaf.classList.add(`result-${level}`);
+      setTimeout(() => heroLeaf.classList.remove(`result-${level}`), 3000);
+    }
   }
 
   function renderDetails(details) {
@@ -378,13 +596,109 @@
 
   /* ---------- reset and print ---------- */
   $("reset-btn").addEventListener("click", () => {
-    results.hidden = true;
-    clearFile("rgb");
-    clearFile("thermal");
-    hideError();
-    $("analyse").scrollIntoView({ behavior: "smooth", block: "start" });
+    safeGsap.to(results, {
+      opacity: 0,
+      y: 20,
+      scale: 0.98,
+      duration: 0.3,
+      ease: "power2.in",
+      onComplete: () => {
+        results.hidden = true;
+        clearFile("rgb");
+        clearFile("thermal");
+        hideError();
+        document.querySelectorAll(".step").forEach((step) => {
+          step.dataset.animated = "false";
+        });
+        $("analyse").scrollIntoView({ behavior: "smooth", block: "start" });
+      },
+    });
   });
   $("print-btn").addEventListener("click", () => window.print());
 
-  updateUI();
+  /* ---------- Scroll Effects ---------- */
+  function initScrollEffects() {
+    let lastScroll = 0;
+    window.addEventListener(
+      "scroll",
+      () => {
+        const currentScroll = window.scrollY;
+        const topbar = document.querySelector(".topbar");
+        if (topbar) {
+          if (currentScroll > 50) {
+            topbar.classList.add("scrolled");
+          } else {
+            topbar.classList.remove("scrolled");
+          }
+        }
+        lastScroll = currentScroll;
+      },
+      { passive: true },
+    );
+
+    const heroArt = document.querySelector(".hero-art");
+    if (heroArt) {
+      window.addEventListener(
+        "scroll",
+        () => {
+          const scrolled = window.scrollY;
+          const rate = scrolled * -0.3;
+          heroArt.style.transform = `translateY(${rate}px)`;
+        },
+        { passive: true },
+      );
+    }
+  }
+
+  /* ---------- Intersection Observer for Animations ---------- */
+  function initScrollAnimations() {
+    if (typeof IntersectionObserver === "undefined") return;
+    const observerOptions = {
+      threshold: 0.1,
+      rootMargin: "0px 0px -50px 0px",
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add("animate-in");
+          observer.unobserve(entry.target);
+        }
+      });
+    }, observerOptions);
+
+    document.querySelectorAll(".step-3d, .result-block, .table-wrap").forEach((el) => {
+      observer.observe(el);
+    });
+  }
+
+  /* ---------- Initialize ---------- */
+  function init() {
+    updateUI();
+    initScrollEffects();
+    initScrollAnimations();
+
+    safeGsap.from(".step", {
+      opacity: 0,
+      y: 30,
+      duration: 0.6,
+      stagger: 0.1,
+      ease: "power3.out",
+      delay: 0.3,
+    });
+
+    safeGsap.from(".tips", {
+      opacity: 0,
+      x: 50,
+      duration: 0.8,
+      ease: "power3.out",
+      delay: 0.5,
+    });
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", init);
+  } else {
+    init();
+  }
 })();
